@@ -132,14 +132,6 @@ function install_pkg() {
     # install kernel
     apt-get install -y --no-install-recommends $TARGET_KERNEL_PACKAGE
 
-    # graphic installer - ubiquity
-    apt-get install -y \
-        ubiquity \
-        ubiquity-casper \
-        ubiquity-frontend-gtk \
-        ubiquity-slideshow-ubuntu \
-        ubiquity-ubuntu-artwork
-
     # Call into config function
     customize_image
 
@@ -147,7 +139,9 @@ function install_pkg() {
     apt-get autoremove -y
 
     # final touch
-    dpkg-reconfigure locales
+    sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen
+    echo 'LANG=en_US.UTF-8' > /etc/default/locale
+    locale-gen
 
     # network manager
     cat <<EOF > /etc/NetworkManager/NetworkManager.conf
@@ -161,7 +155,40 @@ managed=false
 EOF
 
     dpkg-reconfigure network-manager
+    # configure autologin for root user
+    sed -i "s/ExecStart=.*/ExecStart=-\/sbin\/agetty --noissue --autologin root %I \$TERM/g" /etc/systemd/system/getty.target.wants/getty@tty1.service
+    for i in {2..6}; do cp /etc/systemd/system/getty.target.wants/getty@tty1.service "/etc/systemd/system/getty.target.wants/getty@tty\$i.service"; done
+    # enable tmux on login
+    cat >> /root/.bashrc << EOF
+if command -v tmux &> /dev/null && [ -n "\$PS1" ] && [[ ! "\$TERM" =~ screen ]] && [[ ! "\$TERM" =~ tmux ]] && [ -z "\$TMUX" ]; then
+    exec tmux new-session -A -s $(basename $(tty))
+    sudo su
+fi
+EOF
 
+    cat >> /root/.profile << EOF
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+        . "$HOME/.bashrc"
+    fi
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/.local/bin" ] ; then
+    PATH="$HOME/.local/bin:$PATH"
+fi
+EOF
+    # https://unix.stackexchange.com/a/621872/535653
+    touch /run/casper-no-prompt
+    # root password 'supermicro'
+    # yes "supermicro" | tail -n 2 | passwd root
     apt-get clean -y
 }
 
@@ -193,7 +220,7 @@ search --set=root --file /ubuntu
 insmod all_video
 
 set default="0"
-set timeout=30
+set timeout=5
 
 menuentry "Try Ubuntu FS without installing" {
     linux /casper/vmlinuz boot=casper nopersistent toram quiet splash ---

@@ -7,11 +7,11 @@
 
 # The version of Ubuntu to generate.  Successfully tested LTS: bionic, focal, jammy, noble
 # See https://wiki.ubuntu.com/DevelopmentCodeNames for details
-export TARGET_UBUNTU_VERSION="focal"
+export TARGET_UBUNTU_VERSION="noble"
 
 # The Ubuntu Mirror URL. It's better to change for faster download.
 # More mirrors see: https://launchpad.net/ubuntu/+archivemirrors
-export TARGET_UBUNTU_MIRROR="http://us.archive.ubuntu.com/ubuntu/"
+export TARGET_UBUNTU_MIRROR="https://mirrors.ocf.berkeley.edu/ubuntu/"
 
 # The packaged version of the Linux kernel to install on target image.
 # See https://wiki.ubuntu.com/Kernel/LTSEnablementStack for details
@@ -22,7 +22,7 @@ export TARGET_KERNEL_PACKAGE="linux-generic"
 export TARGET_NAME="ubuntu-from-scratch"
 
 # The text label shown in GRUB for booting into the live environment
-export GRUB_LIVEBOOT_LABEL="Try Ubuntu FS without installing"
+export GRUB_LIVEBOOT_LABEL="Live boot Ubuntu FS"
 
 # The text label shown in GRUB for starting installation
 export GRUB_INSTALL_LABEL="Install Ubuntu FS"
@@ -39,11 +39,7 @@ export TARGET_PACKAGE_REMOVE="
 # Package customisation function.  Update this function to customize packages
 # present on the installed system.
 function customize_image() {
-    # install graphics and desktop
-    apt-get install -y \
-        plymouth-themes \
-        ubuntu-gnome-desktop \
-        ubuntu-gnome-wallpapers
+
 
     # useful tools
     apt-get install -y \
@@ -53,7 +49,10 @@ function customize_image() {
         curl \
         vim \
         nano \
-        less
+        less \
+        unzip \
+        tmux \
+        build-essential
 
     # purge
     apt-get purge -y \

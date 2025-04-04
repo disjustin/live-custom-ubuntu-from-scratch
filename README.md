@@ -12,6 +12,7 @@ This project guides you through building a fully customized version of Ubuntu Li
 * Sufficient disk space and memory for building an ISO.
 
 ## Steps
+
 1. **Prepare the Environment**: Install necessary dependencies.
 2. **Create a Base System**: Use debootstrap to set up a minimal Ubuntu system.
 3. **Customize Packages**: Add/remove software, configure kernel.
@@ -62,11 +63,12 @@ Install packages we need in the `build system` required by our scripts.
 sudo apt-get install \
    debootstrap \
    squashfs-tools \
-   xorriso
+   xorriso \
+   unzip
 ```
 
 ```shell
-mkdir $HOME/live-ubuntu-from-scratch
+mkdir $HOME/live-custom-ubuntu-from-scratch/scripts
 ```
 
 ## Bootstrap and Configure Ubuntu
@@ -80,7 +82,7 @@ mkdir $HOME/live-ubuntu-from-scratch
      --arch=amd64 \
      --variant=minbase \
      noble \
-     $HOME/live-ubuntu-from-scratch/chroot \
+     $HOME/live-custom-ubuntu-from-scratch/scripts/chroot \
      http://us.archive.ubuntu.com/ubuntu/
   ```
   
@@ -89,9 +91,9 @@ mkdir $HOME/live-ubuntu-from-scratch
 * Configure external mount points
   
   ```shell
-  sudo mount --bind /dev $HOME/live-ubuntu-from-scratch/chroot/dev
+  sudo mount --bind /dev $HOME/live-custom-ubuntu-from-scratch/scripts/chroot/dev
   
-  sudo mount --bind /run $HOME/live-ubuntu-from-scratch/chroot/run
+  sudo mount --bind /run $HOME/live-custom-ubuntu-from-scratch/scripts/chroot/run
   ```
 
   As we will be updating and installing packages (grub among them), these mount points are necessary inside the chroot environment, so we are able to finish the installation without errors.
@@ -107,7 +109,7 @@ From this point we will be configuring the `live system`.
 1. **Access chroot environment**
 
    ```shell
-   sudo chroot $HOME/live-ubuntu-from-scratch/chroot
+   sudo chroot $HOME/live-custom-ubuntu-from-scratch/scripts/chroot
    ```
 
 2. **Configure mount points, home and locale**
@@ -226,7 +228,7 @@ From this point we will be configuring the `live system`.
        ubiquity-ubuntu-artwork
     ```
 
-    The next steps will appear, as a result of the packages that will be installed from the previous step, this will happen without anything having  to be informed or executed.
+    The next steps will appear, as a result of the packages that will be installed from the previous step, this will happen without anything having to be informed or executed.
 
     1. Configure keyboard
 
@@ -588,9 +590,9 @@ remove packages specified in `filesystem.manifest` that are *not* listed in `fil
 ## Unbind mount points
 
 ```shell
-sudo umount $HOME/live-ubuntu-from-scratch/chroot/dev
+sudo umount $HOME/live-custom-ubuntu-from-scratch/scripts/chroot/dev
 
-sudo umount $HOME/live-ubuntu-from-scratch/chroot/run
+sudo umount $HOME/live-custom-ubuntu-from-scratch/scripts/chroot/run
 ```
 
 ## Compress the chroot
@@ -600,7 +602,7 @@ After everything has been installed and preconfigured in the **chrooted** enviro
 1. Access build directory
 
    ```shell
-   cd $HOME/live-ubuntu-from-scratch
+   cd $HOME/live-custom-ubuntu-from-scratch/scripts
    ```
 
 2. Move image artifacts
@@ -638,7 +640,7 @@ After everything has been installed and preconfigured in the **chrooted** enviro
 1. Access build directory
 
    ```shell
-   cd $HOME/live-ubuntu-from-scratch/image
+   cd $HOME/live-custom-ubuntu-from-scratch/scripts/image
    ```
 
 2. Create iso from the image directory using the command-line
@@ -649,8 +651,8 @@ After everything has been installed and preconfigured in the **chrooted** enviro
       -iso-level 3 \
       -full-iso9660-filenames \
       -J -J -joliet-long \
-      -volid "Ubuntu from scratch" \
-      -output "../ubuntu-from-scratch.iso" \
+      -volid "ubuntu-24.04.2-live-server-amd64" \
+      -output "../ubuntu-live.iso" \
       -eltorito-boot isolinux/bios.img \
         -no-emul-boot \
         -boot-load-size 4 \
@@ -727,7 +729,7 @@ After everything has been installed and preconfigured in the **chrooted** enviro
 3. Access build directory
 
    ```shell
-   cd $HOME/live-ubuntu-from-scratch/image
+   cd $HOME/live-custom-ubuntu-from-scratch/scripts/image
    ```
 
 4. Create iso from the image directory
@@ -752,7 +754,7 @@ After everything has been installed and preconfigured in the **chrooted** enviro
         -no-emul-boot \
         -isohybrid-gpt-basdat \
     -append_partition 2 0xef EFI/boot/efiboot.img \
-      "$HOME/live-ubuntu-from-scratch/image"
+      "$HOME/live-custom-ubuntu-from-scratch/scripts/image"
    ```
 
 ## Make a bootable USB image
