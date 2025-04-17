@@ -98,7 +98,7 @@ function check_config() {
 function setup_host() {
     echo "=====> running setup_host ..."
     sudo apt update
-    sudo apt install -y debootstrap squashfs-tools xorriso
+    sudo apt install -y debootstrap squashfs-tools xorriso unzip
     sudo mkdir -p chroot
 }
 
