@@ -60,7 +60,7 @@ See also the list of [contributors](CONTRIBUTORS.txt) who participated in this p
 Install packages we need in the `build system` required by our scripts.
 
 ```shell
-sudo apt-get install \
+sudo apt install \
    debootstrap \
    squashfs-tools \
    xorriso \
@@ -137,7 +137,7 @@ From this point we will be configuring the `live system`.
 4. **Configure apt sources.list**
 
    ```shell
-   cat <<EOF > /etc/apt/sources.list
+   cat > /etc/apt/sources.list << EOF
    deb http://us.archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse
    deb-src http://us.archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse
 
@@ -152,24 +152,24 @@ From this point we will be configuring the `live system`.
 5. **Update indexes packages**
 
    ```shell
-   apt-get update
+   apt update
    ```
 
 6. **Install systemd**
 
    ```shell
-   apt-get install -y libterm-readline-gnu-perl systemd-sysv
+   apt install -y libterm-readline-gnu-perl systemd-sysv
    ```
 
    > **systemd** is a system and service manager for Linux. It provides aggressive parallelization capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, keeps track of processes using Linux control groups, maintains mount and automount points and implements an elaborate transactional dependency-based service control logic.
 
 7. **Configure machine-id and divert**
 
-   ```shell
-   dbus-uuidgen > /etc/machine-id
+```shell
+dbus-uuidgen > /etc/machine-id
 
-   ln -fs /etc/machine-id /var/lib/dbus/machine-id
-   ```
+ln -fs /etc/machine-id /var/lib/dbus/machine-id
+```
 
    > The `/etc/machine-id` file contains the unique machine ID of the local system that is set during installation or boot. The machine ID is a single newline-terminated, hexadecimal, 32-character, lowercase ID. When decoded from hexadecimal, this corresponds to a 16-byte/128-bit value. This ID may not be all zeros.
 
@@ -184,13 +184,13 @@ From this point we will be configuring the `live system`.
 8. **Upgrade packages**
 
    ```shell
-   apt-get -y upgrade
+   apt -y upgrade
    ```
 
 9. **Install packages needed for Live System**
 
    ```shell
-   apt-get install -y \
+   apt install -y \
       sudo \
       ubuntu-standard \
       casper \
@@ -214,13 +214,13 @@ From this point we will be configuring the `live system`.
    ```
 
    ```shell
-   apt-get install -y --no-install-recommends linux-generic
+   apt install -y --no-install-recommends linux-generic
    ```
 
 10. **Graphical installer**
 
     ```shell
-    apt-get install -y \
+    apt install -y \
        ubiquity \
        ubiquity-casper \
        ubiquity-frontend-gtk \
@@ -249,7 +249,7 @@ From this point we will be configuring the `live system`.
 11. **Install window manager**
 
     ```shell
-    apt-get install -y \
+    apt install -y \
        plymouth-themes \
        ubuntu-gnome-desktop \
        ubuntu-gnome-wallpapers
@@ -258,7 +258,7 @@ From this point we will be configuring the `live system`.
 12. **Install useful applications**
 
     ```shell
-    apt-get install -y \
+    apt install -y \
        clamav-daemon \
        terminator \
        apt-transport-https \
@@ -285,9 +285,9 @@ From this point we will be configuring the `live system`.
     2. Then update the package cache and install the package using
 
        ```shell
-       apt-get update
+       apt update
 
-       apt-get install -y code
+       apt install -y code
        ```
 
 14. **Install Google Chrome (optional)**
@@ -303,15 +303,15 @@ From this point we will be configuring the `live system`.
     2. Then update the package cache and install the package using
 
        ```shell
-       apt-get update
+       apt update
 
-       apt-get install google-chrome-stable
+       apt install google-chrome-stable
        ```
 
 15. **Install Java JDK 8 (optional)**
 
     ```shell
-    apt-get install -y \
+    apt install -y \
         openjdk-8-jdk \
         openjdk-8-jre
     ```
@@ -319,7 +319,7 @@ From this point we will be configuring the `live system`.
 16. **Remove unused applications (optional)**
 
     ```shell
-    apt-get purge -y \
+    apt purge -y \
        transmission-gtk \
        transmission-common \
        gnome-mahjongg \
@@ -332,7 +332,7 @@ From this point we will be configuring the `live system`.
 17. **Remove unused packages**
 
     ```shell
-    apt-get autoremove -y
+    apt autoremove -y
     ```
 
 18. **Reconfigure packages**
@@ -555,37 +555,37 @@ remove packages specified in `filesystem.manifest` that are *not* listed in `fil
 
 ### Cleanup the chroot environment
 
-   1. If you installed software, be sure to run
+1. If you installed software, be sure to run
 
-      ```shell
-      truncate -s 0 /etc/machine-id
-      ```
+```shell
+truncate -s 0 /etc/machine-id
+```
 
-   2. Remove the diversion
+2. Remove the diversion
 
-      ```shell
-      rm /sbin/initctl
+```shell
+rm /sbin/initctl
 
-      dpkg-divert --rename --remove /sbin/initctl
-      ```
+dpkg-divert --rename --remove /sbin/initctl
+```
 
-   3. Clean up
+3. Clean up
 
-      ```shell
-      apt-get clean
+```shell
+apt clean
 
-      rm -rf /tmp/* ~/.bash_history
+rm -rf /tmp/* ~/.bash_history
 
-      umount /proc
+umount /proc
 
-      umount /sys
+umount /sys
 
-      umount /dev/pts
+umount /dev/pts
 
-      export HISTSIZE=0
+export HISTSIZE=0
 
-      exit
-      ```
+exit
+```
 
 ## Unbind mount points
 
@@ -601,30 +601,30 @@ After everything has been installed and preconfigured in the **chrooted** enviro
 
 1. Access build directory
 
-   ```shell
-   cd $HOME/live-custom-ubuntu-from-scratch/scripts
-   ```
+```shell
+cd $HOME/live-custom-ubuntu-from-scratch/scripts
+```
 
-2. Move image artifacts
+1. Move image artifacts
 
    ```shell
    sudo mv chroot/image .
    ```
 
-3. Create squashfs
+1. Create squashfs
 
-   ```shell
-   sudo mksquashfs chroot image/casper/filesystem.squashfs \
-      -noappend -no-duplicates -no-recovery \
-      -wildcards \
-      -comp xz -b 1M -Xdict-size 100% \
-      -e "var/cache/apt/archives/*" \
-      -e "root/*" \
-      -e "root/.*" \
-      -e "tmp/*" \
-      -e "tmp/.*" \
-      -e "swapfile"
-   ```
+```shell
+mksquashfs chroot image/casper/filesystem.squashfs \
+   -noappend -no-duplicates -no-recovery \
+   -wildcards \
+   -comp xz -b 1M -Xdict-size 100% \
+   -e "var/cache/apt/archives/*" \
+   -e "root/*" \
+   -e "root/.*" \
+   -e "tmp/*" \
+   -e "tmp/.*" \
+   -e "swapfile"
+```
 
    > **Squashfs** is a highly compressed read-only filesystem for Linux. It uses zlib compression to compress both files, inodes and directories. Inodes in the system are very small and all blocks are packed to minimize data overhead. Block sizes greater than 4K are supported up to a maximum of 64K.
    > **Squashfs** is intended for general read-only filesystem use, for archival use (i.e. in cases where a .tar.gz file may be used), and in constrained block device/memory systems (e.g. **embedded systems**) where low overhead is needed.
@@ -639,92 +639,92 @@ After everything has been installed and preconfigured in the **chrooted** enviro
 
 1. Access build directory
 
-   ```shell
-   cd $HOME/live-custom-ubuntu-from-scratch/scripts/image
-   ```
+```shell
+cd $HOME/live-custom-ubuntu-from-scratch/scripts/image
+```
 
-2. Create iso from the image directory using the command-line
+1. Create iso from the image directory using the command-line
 
-   ```shell
-   sudo xorriso \
-      -as mkisofs \
-      -iso-level 3 \
-      -full-iso9660-filenames \
-      -J -J -joliet-long \
-      -volid "ubuntu-24.04.2-live-server-amd64" \
-      -output "../ubuntu-live.iso" \
-      -eltorito-boot isolinux/bios.img \
-        -no-emul-boot \
-        -boot-load-size 4 \
-        -boot-info-table \
-        --eltorito-catalog boot.catalog \
-        --grub2-boot-info \
-        --grub2-mbr ../chroot/usr/lib/grub/i386-pc/boot_hybrid.img \
-        -partition_offset 16 \
-        --mbr-force-bootable \
-      -eltorito-alt-boot \
-        -no-emul-boot \
-        -e isolinux/efiboot.img \
-        -append_partition 2 28732ac11ff8d211ba4b00a0c93ec93b isolinux/efiboot.img \
-        -appended_part_as_gpt \
-        -iso_mbr_part_type a2a0d0ebe5b9334487c068b6b72699c7 \
-        -m "isolinux/efiboot.img" \
-        -m "isolinux/bios.img" \
-        -e '--interval:appended_partition_2:::' \
-      -exclude isolinux \
-      -graft-points \
-         "/EFI/boot/bootx64.efi=isolinux/bootx64.efi" \
-         "/EFI/boot/mmx64.efi=isolinux/mmx64.efi" \
-         "/EFI/boot/grubx64.efi=isolinux/grubx64.efi" \
-         "/EFI/ubuntu/grub.cfg=isolinux/grub.cfg" \
-         "/isolinux/bios.img=isolinux/bios.img" \
-         "/isolinux/efiboot.img=isolinux/efiboot.img" \
-         "."
-   ```
+```shell
+xorriso \
+-as mkisofs \
+-iso-level 3 \
+-full-iso9660-filenames \
+-J -J -joliet-long \
+-volid "ubuntu-24.04.2-live-server-amd64" \
+-output "../ubuntu-live.iso" \
+-eltorito-boot isolinux/bios.img \
+  -no-emul-boot \
+  -boot-load-size 4 \
+  -boot-info-table \
+  --eltorito-catalog boot.catalog \
+  --grub2-boot-info \
+  --grub2-mbr /mnt/usr/lib/grub/i386-pc/boot_hybrid.img \
+  -partition_offset 16 \
+  --mbr-force-bootable \
+-eltorito-alt-boot \
+  -no-emul-boot \
+  -e isolinux/efiboot.img \
+  -append_partition 2 28732ac11ff8d211ba4b00a0c93ec93b isolinux/efiboot.img \
+  -appended_part_as_gpt \
+  -iso_mbr_part_type a2a0d0ebe5b9334487c068b6b72699c7 \
+  -m "isolinux/efiboot.img" \
+  -m "isolinux/bios.img" \
+  -e '--interval:appended_partition_2:::' \
+-exclude isolinux \
+-graft-points \
+   "/EFI/boot/bootx64.efi=isolinux/bootx64.efi" \
+   "/EFI/boot/mmx64.efi=isolinux/mmx64.efi" \
+   "/EFI/boot/grubx64.efi=isolinux/grubx64.efi" \
+   "/EFI/ubuntu/grub.cfg=isolinux/grub.cfg" \
+   "/isolinux/bios.img=isolinux/bios.img" \
+   "/isolinux/efiboot.img=isolinux/efiboot.img" \
+   "."
+```
 
 ## Alternative way, if previous one fails, create an Hybrid ISO
 
 1. Create a ISOLINUX (syslinux) boot menu
 
-   ```shell
-   cat <<EOF> isolinux/isolinux.cfg
-   UI vesamenu.c32
+```shell
+cat > isolinux/isolinux.cfg <<EOF
+UI vesamenu.c32
 
-   MENU TITLE Boot Menu
-   DEFAULT linux
-   TIMEOUT 600
-   MENU RESOLUTION 640 480
-   MENU COLOR border       30;44   #40ffffff #a0000000 std
-   MENU COLOR title        1;36;44 #9033ccff #a0000000 std
-   MENU COLOR sel          7;37;40 #e0ffffff #20ffffff all
-   MENU COLOR unsel        37;44   #50ffffff #a0000000 std
-   MENU COLOR help         37;40   #c0ffffff #a0000000 std
-   MENU COLOR timeout_msg  37;40   #80ffffff #00000000 std
-   MENU COLOR timeout      1;37;40 #c0ffffff #00000000 std
-   MENU COLOR msg07        37;40   #90ffffff #a0000000 std
-   MENU COLOR tabmsg       31;40   #30ffffff #00000000 std
+MENU TITLE Boot Menu
+DEFAULT linux
+TIMEOUT 50
+MENU RESOLUTION 640 480
+MENU COLOR border       30;44   #40ffffff #a0000000 std
+MENU COLOR title        1;36;44 #9033ccff #a0000000 std
+MENU COLOR sel          7;37;40 #e0ffffff #20ffffff all
+MENU COLOR unsel        37;44   #50ffffff #a0000000 std
+MENU COLOR help         37;40   #c0ffffff #a0000000 std
+MENU COLOR timeout_msg  37;40   #80ffffff #00000000 std
+MENU COLOR timeout      1;37;40 #c0ffffff #00000000 std
+MENU COLOR msg07        37;40   #90ffffff #a0000000 std
+MENU COLOR tabmsg       31;40   #30ffffff #00000000 std
 
-   LABEL linux
-    MENU LABEL Try Ubuntu FS
-    MENU DEFAULT
-    KERNEL /casper/vmlinuz
-    APPEND initrd=/casper/initrd boot=casper
+LABEL linux
+ MENU LABEL Ubuntu Live
+ MENU DEFAULT
+ KERNEL /casper/vmlinuz
+ APPEND initrd=/casper/initrd boot=casper
 
-   LABEL linux
-    MENU LABEL Try Ubuntu FS (nomodeset)
-    MENU DEFAULT
-    KERNEL /casper/vmlinuz
-    APPEND initrd=/casper/initrd boot=casper nomodeset
-   EOF
-   ```
+LABEL linux
+ MENU LABEL Ubuntu Live (nomodeset)
+ MENU DEFAULT
+ KERNEL /casper/vmlinuz
+ APPEND initrd=/casper/initrd boot=casper nomodeset
+EOF
+```
 
 2. Include syslinux bios modules
 
-   ```shell
-   apt install -y syslinux-common && \
-   cp /usr/lib/ISOLINUX/isolinux.bin image/isolinux/ && \
-   cp /usr/lib/syslinux/modules/bios/* image/isolinux/
-   ```
+```shell
+apt install -y syslinux-common && \
+cp /usr/lib/ISOLINUX/isolinux.bin image/isolinux/ && \
+cp /usr/lib/syslinux/modules/bios/* image/isolinux/
+```
 
 3. Access build directory
 
